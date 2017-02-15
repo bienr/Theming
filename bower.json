@@ -14,5 +14,7 @@
       ]
     }
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "html5shiv": "^3.7.3"
+  }
 }

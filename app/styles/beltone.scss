@@ -1,9 +1,9 @@
-
+@import 'beltone/variables';
 // bower:scss
 // endbower
 
-@import 'beltone/variables';
 @import 'bootstrap';
+@import 'sprites/*';
 @import '../components/atoms/**/*';
 @import '../components/molecules/**/*';
 @import '../components/organisms/**/*';
