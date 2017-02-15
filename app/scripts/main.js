@@ -1,7 +1,7 @@
-import _ from 'lodash'
-import header from 'header'
+import $ from 'jquery'
+import Header from 'header'
 
 $(document).ready(() => {
-    header.test()
+    var header = new Header();
 })
 

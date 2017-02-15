@@ -39,6 +39,7 @@
     "main-bower-files": "^2.13.1",
     "mocha": "^3.2.0",
     "run-sequence": "^1.2.2",
+    "sass-lint": "^1.10.2",
     "wiredep": "^4.0.0"
   },
   "eslintConfig": {
@@ -54,6 +55,7 @@
       ]
     }
   },
+  "sasslintConfig": "sass-lint.yml",
   "dependencies": {
     "jquery": "^3.1.1",
     "lodash": "^4.17.4"
