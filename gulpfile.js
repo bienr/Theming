@@ -33,6 +33,12 @@ gulp.task('styles', () => {
     .pipe(reload({ stream: true }));
 });
 
+gulp.task('build:styles', ['styles'], () => {
+    return gulp.src('.tmp/styles')
+      .pipe($.cssnano({ safe: true, autoprefixer: true }))
+      .pipe(gulp.dest('dist'))
+})
+
 gulp.task('scripts', ['scripts:test'], () => {
   return gulp.src('app/scripts/**/*.js')
     .pipe($.plumber())
@@ -42,6 +48,12 @@ gulp.task('scripts', ['scripts:test'], () => {
     .pipe(gulp.dest('.tmp/scripts'))
     .pipe(reload({ stream: true }));
 });
+
+gulp.task('build:scripts', ['scripts'], () => {
+    return gulp.src('.tmp/scripts')
+      .pipe($.uglify())
+      .pipe(gulp.dest('dist'))
+})
 
 gulp.task('scripts:test', () => {
   return gulp.src('test/spec/test.js')
@@ -75,10 +87,22 @@ gulp.task('html', ['styles', 'scripts'], () => {
   return gulp.src('app/*.html')
     .pipe($.useref({ searchPath: ['.tmp', 'app', '.'] }))
     .pipe($.if('*.js', $.uglify()))
-    .pipe($.if('*.css', $.cssnano({ safe: true, autoprefixer: false })))
+    .pipe($.if('*.css', $.cssnano({ safe: true, autoprefixer: true })))
     .pipe($.if('*.html', $.htmlmin({ collapseWhitespace: true })))
     .pipe(gulp.dest('dist'));
 });
+
+gulp.task('mustache', () => {
+  return gulp.src('app/**/*.mustache')
+    .pipe($.mustache())
+    .pipe($.rename({extname:'.html'}))
+    .pipe(gulp.dest('.tmp'))
+})
+gulp.task('build:mustache', ['mustache'], () => {
+  return gulp.src('.tmp/**/*.html')
+    .pipe($.htmlmin({ collapseWhitespace: true }))
+    .pipe(gulp.dest('dist'))
+})
 
 gulp.task('images', () => {
   return gulp.src('app/images/**/*')
@@ -104,7 +128,7 @@ gulp.task('extras', () => {
 gulp.task('clean', del.bind(null, ['.tmp', 'dist']));
 
 gulp.task('serve', () => {
-  runSequence(['clean', 'wiredep'], ['styles', 'scripts', 'fonts'], () => {
+  runSequence(['clean', 'wiredep'], ['styles', 'scripts', 'fonts', 'mustache'], () => {
     browserSync.init({
       notify: false,
       port: 9000,
@@ -118,10 +142,12 @@ gulp.task('serve', () => {
 
     gulp.watch([
       'app/*.html',
+      'app/**/*.mustache',
       'app/images/**/*',
       '.tmp/fonts/**/*'
     ]).on('change', reload);
 
+    gulp.watch('app/**/*.mustache', ['mustache'])
     gulp.watch('app/**/*.scss', ['styles']);
     gulp.watch('app/**/*.js', ['scripts']);
     gulp.watch('app/fonts/**/*', ['fonts']);
@@ -168,7 +194,7 @@ gulp.task('wiredep', () => {
     }))
     .pipe(gulp.dest('app/styles'));
 
-  gulp.src('app/*.html')
+gulp.src('app/*.mustache')
     .pipe(wiredep({
       exclude: ['bootstrap-sass', 'jquery', 'modernizr'],
       ignorePath: /^(\.\.\/)*\.\./
@@ -176,7 +202,7 @@ gulp.task('wiredep', () => {
     .pipe(gulp.dest('app'));
 });
 
-gulp.task('build', ['lint', 'html', 'images', 'fonts', 'extras'], () => {
+gulp.task('build', ['lint', 'html', 'images', 'fonts', 'extras', 'build:scripts', 'build:styles', 'build:mustache'], () => {
   return gulp.src('dist/**/*').pipe($.size({ title: 'build', gzip: true }));
 });
 
