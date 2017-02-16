@@ -15,7 +15,7 @@ var dev = true;
 
 const browserifySettings = {
     transform: "babelify",
-    paths: ['./node_modules', './app/components', './app/components/atoms', './app/components/molecules', './app/components/organisms', './bower_components'],
+    paths: ['./node_modules', './app/components', './app/components/atoms', './app/components/molecules', './app/components/organisms'],
     insertGlobals: true
 }
 
@@ -39,7 +39,15 @@ gulp.task('styles', () => {
     return gulp.src('app/styles/*.scss')
         .pipe($.sassGlob())
         .pipe($.sourcemaps.init())
-        .pipe($.plumber())
+        .pipe($.plumber({
+            errorHandler: $.notify.onError({
+                title: 'Sass',
+                message: "Error: <%= error.message %>",
+                icon: path.join(__dirname, '/.sass.png'),
+                onLast: true,
+                sound: false
+            })
+        }))
         .pipe($.sass.sync({
             outputStyle: 'expanded',
             precision: 10,
@@ -60,7 +68,15 @@ gulp.task('build:styles', ['styles'], () => {
 
 gulp.task('scripts', ['scripts:test'], () => {
     return gulp.src('app/scripts/**/*.js')
-        .pipe($.plumber({ errorHandler: $.notify.onError("Error: <%= error.message %>") }))
+        .pipe($.plumber({
+            errorHandler: $.notify.onError({
+                title: 'Javascript',
+                message: "Error: <%= error.message %>",
+                icon: path.join(__dirname, '/.js.png'),
+                onLast: true,
+                sound: false
+            })
+        }))
         .pipe($.sourcemaps.init())
         .pipe($.browserify(browserifySettings))
         .pipe($.sourcemaps.write('.'))
@@ -78,6 +94,7 @@ gulp.task('build:scripts', ['scripts'], () => {
 
 gulp.task('scripts:test', () => {
     return gulp.src('test/spec/test.js')
+        .pipe($.changed('.tmp/scripts/test/spec/'))
         .pipe($.plumber())
         .pipe($.rename('test.js'))
         .pipe($.sourcemaps.init())
@@ -114,7 +131,6 @@ gulp.task('html', ['styles', 'scripts'], () => {
 });
 
 gulp.task('handlebars', () => {
-
     let components = _.reduce(directoryTree('./app/components/'), (result, folder) => {
         _.forEach(folder, child => {
             if (_.isNil(child.children) || child.children.length < 0) return result
@@ -122,23 +138,21 @@ gulp.task('handlebars', () => {
         })
         return result
     }, [])
-
     return gulp.src('app/**/*.hbs')
         .pipe($.plumber({
             errorHandler: $.notify.onError({
                 title: 'Handlebars',
                 message: "Error: <%= error.message %>",
-                icon: path.join(__dirname, '/app/handlebars.png'),
+                icon: path.join(__dirname, '/.handlebars.png'),
                 onLast: true,
                 sound: false
             })
         }))
         .pipe($.compileHandlebars({}, {
-            ignorePartials: true,
-            batch: ['./app/views/partials']
-                .concat(components)
+            batch: ['./app/views/partials'].concat(components)
         }))
         .pipe($.rename({ extname: '.html' }))
+        .pipe($.htmlPrettify())
         .pipe(gulp.dest('.tmp'))
 })
 
@@ -184,8 +198,7 @@ gulp.task('serve', () => {
             }
         });
         gulp.watch([
-            'app/*.html',
-            'app/**/*.hbs',
+            '.tmp/*.html',
             'app/images/**/*',
             '.tmp/fonts/**/*'
         ]).on('change', reload);
