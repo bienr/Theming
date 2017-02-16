@@ -149,6 +149,7 @@ gulp.task('handlebars', () => {
             })
         }))
         .pipe($.compileHandlebars({}, {
+            ignorePartials: true,
             batch: ['./app/views/partials'].concat(components)
         }))
         .pipe($.rename({ extname: '.html' }))
@@ -263,8 +264,7 @@ gulp.task('build', ['lint', 'html', 'images', 'fonts', 'extras', 'build:scripts'
         .pipe($.size({ title: 'build', gzip: true }))
         .pipe($.notify({
             title: 'GNH Frontend',
-            subtitle: 'gulp build',
-            message: 'was successfully built to "/dist"',
+            message: `was successfully built to ${path.join(__dirname, '/dist')}`,
             onLast: true,
             icon: path.join(__dirname, '/app/apple-touch-icon.png')
         }));

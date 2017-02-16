@@ -1,0 +1,11 @@
+body {
+    font-size: 1em;
+
+    @include tablet {
+        font-size: 1.2em;
+    }
+
+    @include desktop {
+        font-size: 1.5em;
+    }
+}

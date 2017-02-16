@@ -4,18 +4,33 @@
     }
 }
 @mixin tablet {
-  @media (min-width: #{$screen-tablet}) and (max-width: #{$screen-sm-max}) {
+  @media (min-width: #{$screen-tablet}) {
     @content;
   }
 }
 
 @mixin desktop {
-  @media (min-width: #{$screen-desktop}) and (max-width: #{$screen-md-max}) {
+  @media (min-width: #{$screen-desktop}) {
     @content;
   }
 }
 @mixin lg-desktop {
     @media (min-width: #{$screen-lg-desktop}) {
         @content
+    }
+}
+
+@mixin center($horizontal: true, $vertical: true) {
+    position: absolute;
+    @if ($horizontal and $vertical) {
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    } @else if ($horizontal) {
+        left: 50%;
+        transform: translate(-50%, 0);
+    } @else if ($vertical) {
+        top: 50%;
+        transform: translate(0, 50%);
     }
 }
